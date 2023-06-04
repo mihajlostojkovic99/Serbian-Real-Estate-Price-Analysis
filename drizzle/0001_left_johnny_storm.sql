@@ -1,0 +1,16 @@
+ALTER TABLE "houses_for_rent" ALTER COLUMN "registration" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "floor_heating" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "central_heating" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "electric_heating" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "solid_fuel_heating" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "gas_heating" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "thermal_storage" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "air_con" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "parking" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "garage" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "elevator" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "balcony" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "basement" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "pool" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "garden" SET DEFAULT false;
+ALTER TABLE "houses_for_rent" ALTER COLUMN "reception" SET DEFAULT false;

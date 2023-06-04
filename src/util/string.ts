@@ -1,15 +1,15 @@
 export function parseNumber(input?: string | null): number | null {
-	if (!input) {
-		return null
-	}
+  if (!input) {
+    return null
+  }
 
-	const parsedNumber = Number(input)
+  const parsedNumber = Number(input)
 
-	if (isNaN(parsedNumber)) {
-		return null
-	}
+  if (isNaN(parsedNumber)) {
+    return null
+  }
 
-	return parsedNumber
+  return parsedNumber
 }
 
 /**
@@ -29,24 +29,24 @@ export function parseNumber(input?: string | null): number | null {
  * @example getAttribute("attribute", ["attribute: value", "attribute2: value2"], "number", "=")
  */
 export function getAttribute<T extends string | number = string>(
-	attribute: string,
-	attributes?: string[],
-	type: "number" | "string" = "string",
-	delimiter: string = ":"
+  attribute: string,
+  attributes?: string[],
+  type: 'number' | 'string' = 'string',
+  delimiter: string = ':',
 ): T | null {
-	if (!attributes) {
-		return null
-	}
+  if (!attributes) {
+    return null
+  }
 
-	const attributeValue = attributes.find((val) => val.toLowerCase().includes(`${attribute.toLowerCase()}${delimiter}`))
+  const attributeValue = attributes.find((val) => val.toLowerCase().includes(`${attribute.toLowerCase()}${delimiter}`))
 
-	if (!attributeValue) {
-		return null
-	}
+  if (!attributeValue) {
+    return null
+  }
 
-	return (
-		type === "string"
-			? attributeValue.split(delimiter)[1].trim().toLowerCase()
-			: parseNumber(attributeValue.split(delimiter)[1].trim())
-	) as T
+  return (
+    type === 'string'
+      ? attributeValue.split(delimiter)[1].trim().toLowerCase()
+      : parseNumber(attributeValue.split(delimiter)[1].trim())
+  ) as T
 }

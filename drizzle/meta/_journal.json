@@ -1,0 +1,48 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1685883520489,
+      "tag": "0000_cheerful_natasha_romanoff",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1685889078531,
+      "tag": "0001_left_johnny_storm",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1685889521686,
+      "tag": "0002_lazy_human_robot",
+      "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1685891065688,
+      "tag": "0003_steep_richard_fisk",
+      "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1685891636005,
+      "tag": "0004_slimy_shockwave",
+      "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1685893581423,
+      "tag": "0005_sharp_thaddeus_ross",
+      "breakpoints": false
+    }
+  ]
+}

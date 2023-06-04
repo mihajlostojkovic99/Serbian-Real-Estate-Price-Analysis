@@ -1,0 +1,803 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "id": "ffed56c4-7408-4b1a-8636-e0c56c8edc78",
+  "prevId": "c9f945e1-a1c1-493c-842e-d57808fe551a",
+  "tables": {
+    "apartments_for_rent": {
+      "name": "apartments_for_rent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "original_id": {
+          "name": "original_id",
+          "type": "varchar(14)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sq_meters": {
+          "name": "sq_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year_built": {
+          "name": "year_built",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor": {
+          "name": "floor",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_floors": {
+          "name": "total_floors",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration": {
+          "name": "registration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor_heating": {
+          "name": "floor_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "central_heating": {
+          "name": "central_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "electric_heating": {
+          "name": "electric_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solid_fuel_heating": {
+          "name": "solid_fuel_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gas_heating": {
+          "name": "gas_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thermal_storage": {
+          "name": "thermal_storage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "air_con": {
+          "name": "air_con",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_rooms": {
+          "name": "num_of_rooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_bathrooms": {
+          "name": "num_of_bathrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parking": {
+          "name": "parking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garage": {
+          "name": "garage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elevator": {
+          "name": "elevator",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "balcony": {
+          "name": "balcony",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "basement": {
+          "name": "basement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pool": {
+          "name": "pool",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garden": {
+          "name": "garden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reception": {
+          "name": "reception",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "idx_apartments_for_rent_url_original_id": {
+          "name": "idx_apartments_for_rent_url_original_id",
+          "columns": [
+            "url",
+            "original_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    },
+    "apartments_for_sale": {
+      "name": "apartments_for_sale",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "original_id": {
+          "name": "original_id",
+          "type": "varchar(14)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sq_meters": {
+          "name": "sq_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year_built": {
+          "name": "year_built",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor": {
+          "name": "floor",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_floors": {
+          "name": "total_floors",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration": {
+          "name": "registration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor_heating": {
+          "name": "floor_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "central_heating": {
+          "name": "central_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "electric_heating": {
+          "name": "electric_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solid_fuel_heating": {
+          "name": "solid_fuel_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gas_heating": {
+          "name": "gas_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thermal_storage": {
+          "name": "thermal_storage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "air_con": {
+          "name": "air_con",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_rooms": {
+          "name": "num_of_rooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_bathrooms": {
+          "name": "num_of_bathrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parking": {
+          "name": "parking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garage": {
+          "name": "garage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elevator": {
+          "name": "elevator",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "balcony": {
+          "name": "balcony",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "basement": {
+          "name": "basement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pool": {
+          "name": "pool",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garden": {
+          "name": "garden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reception": {
+          "name": "reception",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "idx_apartments_for_sale_url_original_id": {
+          "name": "idx_apartments_for_sale_url_original_id",
+          "columns": [
+            "url",
+            "original_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    },
+    "houses_for_rent": {
+      "name": "houses_for_rent",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "original_id": {
+          "name": "original_id",
+          "type": "varchar(14)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sq_meters": {
+          "name": "sq_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_area": {
+          "name": "land_area",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year_built": {
+          "name": "year_built",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_floors": {
+          "name": "total_floors",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration": {
+          "name": "registration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "floor_heating": {
+          "name": "floor_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "central_heating": {
+          "name": "central_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "electric_heating": {
+          "name": "electric_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "solid_fuel_heating": {
+          "name": "solid_fuel_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "gas_heating": {
+          "name": "gas_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "thermal_storage": {
+          "name": "thermal_storage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "air_con": {
+          "name": "air_con",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "num_of_rooms": {
+          "name": "num_of_rooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_bathrooms": {
+          "name": "num_of_bathrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parking": {
+          "name": "parking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "garage": {
+          "name": "garage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "elevator": {
+          "name": "elevator",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "balcony": {
+          "name": "balcony",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "basement": {
+          "name": "basement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "pool": {
+          "name": "pool",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "garden": {
+          "name": "garden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "reception": {
+          "name": "reception",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "idx_houses_for_rent_url_original_id": {
+          "name": "idx_houses_for_rent_url_original_id",
+          "columns": [
+            "url",
+            "original_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    },
+    "houses_for_sale": {
+      "name": "houses_for_sale",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "original_id": {
+          "name": "original_id",
+          "type": "varchar(14)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sq_meters": {
+          "name": "sq_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_area": {
+          "name": "land_area",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year_built": {
+          "name": "year_built",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_floors": {
+          "name": "total_floors",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration": {
+          "name": "registration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor_heating": {
+          "name": "floor_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "central_heating": {
+          "name": "central_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "electric_heating": {
+          "name": "electric_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solid_fuel_heating": {
+          "name": "solid_fuel_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gas_heating": {
+          "name": "gas_heating",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thermal_storage": {
+          "name": "thermal_storage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "air_con": {
+          "name": "air_con",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_rooms": {
+          "name": "num_of_rooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_bathrooms": {
+          "name": "num_of_bathrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parking": {
+          "name": "parking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garage": {
+          "name": "garage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elevator": {
+          "name": "elevator",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "balcony": {
+          "name": "balcony",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "basement": {
+          "name": "basement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pool": {
+          "name": "pool",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "garden": {
+          "name": "garden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reception": {
+          "name": "reception",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "idx_houses_for_sale_url_original_id": {
+          "name": "idx_houses_for_sale_url_original_id",
+          "columns": [
+            "url",
+            "original_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
