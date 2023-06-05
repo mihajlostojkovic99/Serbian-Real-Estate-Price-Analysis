@@ -18,10 +18,16 @@ const MAX_PRICE = 30_000_000
 const STEP = 20_000
 
 router.use(async ({ blockRequests, request }) => {
-  if (request.label !== 'HOMEPAGE')
+  if (request.label !== 'HOMEPAGE') {
     await blockRequests({
-      extraUrlPatterns: ['https://cms.nekretnine.rs/foto/*', 'https://img.nekretnine.rs/foto/*'],
+      extraUrlPatterns: [
+        'https://cms.nekretnine.rs/foto/**',
+        'https://img.nekretnine.rs/foto/**',
+        'https://www.nekretnine.rs/build/images/**',
+        'https://maps-api.planplus.rs/**',
+      ],
     })
+  }
 })
 
 router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
@@ -110,12 +116,9 @@ router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
   }
 
   const pageNumber = await page.locator('.next-number.active').innerText()
-  const offerType = await page
-    .locator('body > div:nth-child(18) > div.list-page > div:nth-child(1) > ol > li:nth-child(4) > span')
-    .innerText()
-  log.info(`Fetching urls on "${offerType ?? 'not found'}" page number ${pageNumber ?? 'not found'}...`, {
-    url: request.loadedUrl,
-  })
+
+  const filtersChosen = await page.locator('#izabrali-ste').innerText()
+  log.info(`Fetching urls on "${filtersChosen}" page number ${pageNumber}...`, { url: request.loadedUrl })
 
   await enqueueLinks({
     selector: '.next-number',
@@ -135,21 +138,40 @@ router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
 })
 
 router.addHandler('PROPERTY', async ({ page, request, log }) => {
-  const details = await page
-    .locator('#detalji > div:nth-child(2)')
-    .innerText()
-    .then((val) => val.toLowerCase().split('\n'))
+  const [details, moreInfo, other, price, title, locationArr] = await Promise.all([
+    page
+      .$('#detalji > div:nth-child(2)')
+      .then((el) => el?.innerText())
+      .then((val) => val?.toLowerCase().split('\n')),
+    page
+      .$('#detalji > div:nth-child(3)')
+      .then((el) => el?.innerText())
+      .then((val) => val?.toLowerCase().split('\n'))
+      .then((val) => (val?.includes('dodatna opremljenost') ? val : undefined)),
+    page
+      .$('#detalji > div:last-child')
+      .then((el) => el?.innerText())
+      .then((val) => val?.toLowerCase().split('\n'))
+      .then((val) => (val?.includes('ostalo') ? val : undefined)),
+    page
+      .locator('.stickyBox__price')
+      .innerText()
+      .then((val) => {
+        return +val.split('\n')[0].replace(' EUR', '').replace(/\s+/g, '')
+      }),
+    page
+      .locator('.detail-title')
+      .innerText()
+      .then((val) => val.trim()),
+    page
+      .locator('.stickyBox__Location')
+      .innerText()
+      .then((val) => val.split(',').map((el) => el.toLowerCase().trim())),
+  ])
+
+  log.info('TESTING: ', { details, moreInfo, other })
 
   const type = getAttribute('kategorija', details)
-
-  const moreInfo = await page
-    .locator('#detalji > div:nth-child(3)')
-    .innerText()
-    .then((val) => val.toLowerCase().split('\n'))
-
-  if (moreInfo[0] !== 'dodatna opremljenost') {
-    moreInfo.length = 0
-  }
 
   const forSale = getAttribute('transakcija', details) === 'prodaja' ? true : false
   const houseOrApartment = type?.includes('kuća')
@@ -157,35 +179,25 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
     : type?.includes('garsonjera') || type?.includes('stan')
     ? 'apartment'
     : null
-  const price = await page
-    .locator('.stickyBox__price')
-    .innerText()
-    .then((val) => {
-      return +val.split('\n')[0].replace(' EUR', '').replace(/\s+/g, '')
-    })
 
   const originalId = request.url.split('/').slice(-2, -1)[0]
   const url = request.url
-  const title = (await page.locator('.detail-title').innerText()).trim()
   const numOfRooms = getAttribute<number>('broj soba', details, 'number')
   const numOfBathrooms = getAttribute<number>('broj kupatila', details, 'number')
   const sqMeters = parseNumber(
     (getAttribute('kvadratura', details) || getAttribute('korisna površina do', details))?.split(' ')[0],
   )
   const landArea = getAttribute('površina zemljišta', details)?.split(' ')[0]
-  const locationArr = (await page.locator('.stickyBox__Location').innerText())
-    .split(',')
-    .map((el) => el.toLowerCase().trim())
   const yearBuilt = getAttribute<number>('godina izgradnje', details, 'number')
-  const balcony = moreInfo.includes('terasa') || moreInfo.includes('balkon') || moreInfo.includes('lođa')
-  const basement = moreInfo.includes('podrum')
-  const elevator = moreInfo.includes('lift')
+  const balcony = moreInfo?.includes('terasa') || moreInfo?.includes('balkon') || moreInfo?.includes('lođa')
+  const basement = moreInfo?.includes('podrum')
+  const elevator = moreInfo?.includes('lift')
   const parking =
-    moreInfo.includes('spoljno parking mesto') || moreInfo.includes('garaža') || moreInfo.includes('garažno mesto')
-  const garage = moreInfo.includes('garaža') || moreInfo.includes('garažno mesto')
-  const pool = moreInfo.includes('bazen')
-  const garden = moreInfo.includes('vrt')
-  const reception = moreInfo.includes('recepcija')
+    moreInfo?.includes('spoljno parking mesto') || moreInfo?.includes('garaža') || moreInfo?.includes('garažno mesto')
+  const garage = moreInfo?.includes('garaža') || moreInfo?.includes('garažno mesto')
+  const pool = moreInfo?.includes('bazen')
+  const garden = moreInfo?.includes('vrt')
+  const reception = moreInfo?.includes('recepcija')
   const registration = getAttribute('uknjiženo', details)?.includes('da') ?? false
 
   const totalFloors: number | null = getAttribute('ukupan brој spratova', details, 'number')
@@ -209,11 +221,6 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       floor = parseNumber(floorString)
   }
 
-  const other = await page
-    .locator('#detalji > div:last-child')
-    .innerText()
-    .then((val) => val.toLowerCase().split('\n'))
-
   const heatings = getAttribute('grejanje', other)
     ?.split(',')
     .map((el) => el.trim())
@@ -233,7 +240,7 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       houseOrApartment,
       price,
     })
-    Dataset.pushData({ url, originalId, title, forSale, type: houseOrApartment })
+    Dataset.pushData({ url, originalId, title, forSale, type: houseOrApartment, error: true })
     return
   }
 
@@ -248,7 +255,7 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       location: locationArr.join(','),
       numOfRooms: numOfRooms?.toString(),
       numOfBathrooms,
-      sqMeters,
+      sqMeters: sqMeters?.toString(),
       landArea,
       yearBuilt,
       balcony,
@@ -290,7 +297,7 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       location: locationArr.join(','),
       numOfRooms: numOfRooms?.toString(),
       numOfBathrooms,
-      sqMeters,
+      sqMeters: sqMeters?.toString(),
       yearBuilt,
       balcony,
       basement,

@@ -43,6 +43,13 @@
       "when": 1685893581423,
       "tag": "0005_sharp_thaddeus_ross",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1685913050052,
+      "tag": "0006_lumpy_prowler",
+      "breakpoints": false
     }
   ]
 }
