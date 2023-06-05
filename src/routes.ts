@@ -169,8 +169,6 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       .then((val) => val.split(',').map((el) => el.toLowerCase().trim())),
   ])
 
-  log.info('TESTING: ', { details, moreInfo, other })
-
   const type = getAttribute('kategorija', details)
 
   const forSale = getAttribute('transakcija', details) === 'prodaja' ? true : false
