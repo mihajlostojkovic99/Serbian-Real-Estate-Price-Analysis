@@ -8,26 +8,26 @@ import { migrationClient } from './db/drizzle.ts'
 import { router } from './routes.ts'
 
 const startUrls: RequestOptions[] = [
-  {
-    // Apartments for sale
-    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/lista/po-stranici/20/',
-    label: 'HOMEPAGE',
-  },
-  {
-    // Apartments for renting
-    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
-    label: 'LIST',
-  },
+  // {
+  //   // Apartments for sale
+  //   url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/lista/po-stranici/20/',
+  //   label: 'HOMEPAGE',
+  // },
+  // {
+  //   // Apartments for renting
+  //   url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
+  //   label: 'LIST',
+  // },
   {
     // Houses for sale
     url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/',
     label: 'LIST',
   },
-  {
-    // Houses for renting
-    url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
-    label: 'LIST',
-  },
+  // {
+  //   // Houses for renting
+  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
+  //   label: 'LIST',
+  // },
 ]
 
 const config = new Configuration({

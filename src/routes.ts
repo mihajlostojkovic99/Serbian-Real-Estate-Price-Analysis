@@ -107,26 +107,33 @@ router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
 })
 
 router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
-  if (request.url.slice(-3, -1) === '10') {
+  if (request.url.includes('po-stranici/10/')) {
     await enqueueLinks({
-      urls: [request.url.slice(0, -3).concat('20/')],
+      urls: [request.url.replace('po-stranici/10/', 'po-stranici/20/')],
       label: 'LIST',
     })
     return
   }
 
-  const pageNumber = await page.locator('.next-number.active').innerText()
+  const parsedUrl = request.url.split('/')
+  const pageNumber = request.url.includes('po-stranici/20/stranica/') ? parsedUrl[parsedUrl.length - 2] : 1
 
   const filtersChosen = await page.locator('#izabrali-ste').innerText()
   log.info(`Fetching urls on "${filtersChosen}" page number ${pageNumber}...`, { url: request.loadedUrl })
 
+  const dataset = await Dataset.open('crawled_links')
+  await dataset.pushData({
+    page: `PAGE "${filtersChosen}", page number ${pageNumber}, crawled`,
+    url: request.loadedUrl,
+  })
+
   await enqueueLinks({
-    selector: '.next-number',
+    selector: 'a.next-number',
     globs: [
-      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/*',
-      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/*',
-      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/*',
-      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/*',
+      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/**',
     ],
     label: request.label,
   })
