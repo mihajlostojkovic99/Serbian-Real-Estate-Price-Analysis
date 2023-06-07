@@ -19,10 +19,20 @@ const startUrls: RequestOptions[] = [
   //   label: 'LIST',
   // },
   {
-    // Houses for sale
-    url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/',
+    // TMP FIX
+    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/_100000/lista/po-stranici/20/stranica/3/',
     label: 'LIST',
   },
+  // {
+  //   // Houses for sale
+  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/',
+  //   label: 'LIST',
+  // },
+  // {
+  //   // TMP FIX, Houses for sale
+  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/52/',
+  //   label: 'LIST',
+  // },
   // {
   //   // Houses for renting
   //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',

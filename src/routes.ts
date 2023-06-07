@@ -1,4 +1,5 @@
 import { Dataset, createPlaywrightRouter } from 'crawlee'
+import { parse } from 'date-fns'
 import { getAttribute, parseNumber } from './util/string.ts'
 import { db } from './db/drizzle.ts'
 import {
@@ -11,6 +12,7 @@ import {
   housesForRent,
   housesForSale,
 } from './db/schema.ts'
+import { parseDate } from './util/dates.ts'
 
 export const router = createPlaywrightRouter()
 
@@ -92,6 +94,7 @@ router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
     await page.focus(priceFromSelector)
     await page.waitForSelector(spinnerSelector, { state: 'visible' })
     await page.waitForSelector(numSelector, { state: 'visible' })
+    await page.waitForSelector(submitSelector)
     await enqueueLinks({ selector: submitSelector, label: 'LIST' })
 
     log.info(`A new price range is established! The range is from ${priceFrom} to ${priceTo}.`, {
@@ -117,35 +120,40 @@ router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
 
   const parsedUrl = request.url.split('/')
   const pageNumber = request.url.includes('po-stranici/20/stranica/') ? parsedUrl[parsedUrl.length - 2] : 1
+  await page.waitForLoadState('domcontentloaded')
 
   const filtersChosen = await page.locator('#izabrali-ste').innerText()
   log.info(`Fetching urls on "${filtersChosen}" page number ${pageNumber}...`, { url: request.loadedUrl })
+
+  await page.waitForSelector('.offer-title > a')
+  await enqueueLinks({
+    selector: '.offer-title > a',
+    label: 'PROPERTY',
+  })
+
+  await page.waitForSelector('a.next-number')
+
+  await page.waitForSelector('a.pagination-arrow.arrow-right')
+  await enqueueLinks({
+    selector: 'a.pagination-arrow.arrow-right',
+    // globs: [
+    //   'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+    //   'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/**',
+    //   'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+    //   'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/**',
+    // ],
+    label: request.label,
+  })
 
   const dataset = await Dataset.open('crawled_links')
   await dataset.pushData({
     page: `PAGE "${filtersChosen}", page number ${pageNumber}, crawled`,
     url: request.loadedUrl,
   })
-
-  await enqueueLinks({
-    selector: 'a.next-number',
-    globs: [
-      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
-      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/**',
-      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
-      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/**',
-    ],
-    label: request.label,
-  })
-
-  await enqueueLinks({
-    selector: '.offer-title > a',
-    label: 'PROPERTY',
-  })
 })
 
 router.addHandler('PROPERTY', async ({ page, request, log }) => {
-  const [details, moreInfo, other, price, title, locationArr] = await Promise.all([
+  const [details, moreInfo, other, price, title, locationArr, datesOfPosting] = await Promise.all([
     page
       .$('#detalji > div:nth-child(2)')
       .then((el) => el?.innerText())
@@ -174,6 +182,10 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
       .locator('.stickyBox__Location')
       .innerText()
       .then((val) => val.split(',').map((el) => el.toLowerCase().trim())),
+    page
+      .$('div.property__body > div.updated')
+      .then((el) => el?.innerText())
+      .then((val) => val?.toLowerCase()),
   ])
 
   const type = getAttribute('kategorija', details)
@@ -238,6 +250,8 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
   const solidFuelHeating = heatings?.includes('etažno grejanje na čvrsto gorivo') ?? false
   const floorHeating = heatings?.includes('podno grejanje') ?? false
 
+  const dates = datesOfPosting?.match(/\b\d{2}\.\d{2}\.\d{4}\b/g)
+
   if (forSale === null || houseOrApartment === null || isNaN(price)) {
     log.error('Insufficient data for db, will be stored in dataset!', {
       url: request.url,
@@ -255,6 +269,8 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
     const newRow: NewHouseForRent | NewHouseForSale = {
       originalId,
       url,
+      dateUpdated: dates && dates[0] ? parse(dates[0], 'dd.MM.yyyy', new Date()).toISOString() : undefined,
+      dateCreated: dates && dates[1] ? parse(dates[1], 'dd.MM.yyyy', new Date()).toISOString() : undefined,
       title,
       city: locationArr[0],
       location: locationArr.join(','),
@@ -297,6 +313,8 @@ router.addHandler('PROPERTY', async ({ page, request, log }) => {
     const newRow: NewApartmentForRent | NewApartmentForSale = {
       originalId,
       url,
+      dateUpdated: parseDate(dates?.[0])?.toISOString(),
+      dateCreated: parseDate(dates?.[1])?.toISOString(),
       title,
       city: locationArr[0],
       location: locationArr.join(','),

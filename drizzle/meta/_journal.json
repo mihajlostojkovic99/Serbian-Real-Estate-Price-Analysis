@@ -50,6 +50,20 @@
       "when": 1685913050052,
       "tag": "0006_lumpy_prowler",
       "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1686075495127,
+      "tag": "0007_perpetual_mad_thinker",
+      "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1686077778075,
+      "tag": "0008_simple_iron_lad",
+      "breakpoints": false
     }
   ]
 }
