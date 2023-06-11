@@ -8,36 +8,31 @@ import { migrationClient } from './db/drizzle.ts'
 import { router } from './routes.ts'
 
 const startUrls: RequestOptions[] = [
-  // {
-  //   // Apartments for sale
-  //   url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/lista/po-stranici/20/',
-  //   label: 'HOMEPAGE',
-  // },
-  // {
-  //   // Apartments for renting
-  //   url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
-  //   label: 'LIST',
-  // },
   {
-    // TMP FIX
-    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/_100000/lista/po-stranici/20/stranica/3/',
+    // Apartments for sale
+    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/lista/po-stranici/20/',
+    label: 'HOMEPAGE',
+  },
+  {
+    // Apartments for renting
+    url: 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
     label: 'LIST',
   },
-  // {
-  //   // Houses for sale
-  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/',
-  //   label: 'LIST',
-  // },
-  // {
-  //   // TMP FIX, Houses for sale
-  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/52/',
-  //   label: 'LIST',
-  // },
-  // {
-  //   // Houses for renting
-  //   url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
-  //   label: 'LIST',
-  // },
+  {
+    // Houses for sale
+    url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/',
+    label: 'LIST',
+  },
+  {
+    // TMP FIX, Houses for sale
+    url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/52/',
+    label: 'LIST',
+  },
+  {
+    // Houses for renting
+    url: 'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/',
+    label: 'LIST',
+  },
 ]
 
 const config = new Configuration({
@@ -54,6 +49,7 @@ const crawler = new PlaywrightCrawler(
     requestHandler: router,
     maxRequestsPerCrawl: 25000,
     maxRequestsPerMinute: 25,
+    maxConcurrency: 1,
     requestHandlerTimeoutSecs: 60 * 3,
     launchContext: {
       launcher: chromium,
