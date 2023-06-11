@@ -6,6 +6,8 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrationClient } from './db/drizzle.ts'
 import { router } from './routes.ts'
+import { cleanup } from './cleanup.ts'
+import { exit } from 'process'
 
 const startUrls: RequestOptions[] = [
   {
@@ -106,3 +108,8 @@ await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
 
 // start crawling
 await crawler.run(startUrls)
+
+// discard properties with not enough info
+await cleanup()
+
+exit()

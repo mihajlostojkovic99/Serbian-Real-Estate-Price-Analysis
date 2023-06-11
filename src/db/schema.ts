@@ -47,6 +47,7 @@ export const housesForRent = pgTable(
     garden: boolean('garden').default(false),
     reception: boolean('reception').default(false),
     price: decimal('price').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
   },
   (housesForRent) => {
     return {
@@ -95,6 +96,7 @@ export const housesForSale = pgTable(
     garden: boolean('garden'),
     reception: boolean('reception'),
     price: decimal('price').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
   },
   (housesForSale) => {
     return {
@@ -143,6 +145,7 @@ export const apartmentsForRent = pgTable(
     garden: boolean('garden'),
     reception: boolean('reception'),
     price: decimal('price').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
   },
   (apartmentsForRent) => {
     return {
@@ -191,6 +194,7 @@ export const apartmentsForSale = pgTable(
     garden: boolean('garden'),
     reception: boolean('reception'),
     price: decimal('price').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
   },
   (apartmentsForSale) => {
     return {
