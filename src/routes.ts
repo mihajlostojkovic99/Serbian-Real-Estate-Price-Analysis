@@ -1,99 +1,10 @@
 import { Dataset, createCheerioRouter } from 'crawlee'
 import { parse } from 'date-fns'
-import { getAttribute, parseNumber } from './util/string.ts'
+import { parseNumber } from './util/string.ts'
 import { db } from './db/drizzle.ts'
-import {
-  NewApartmentForRent,
-  NewApartmentForSale,
-  NewHouseForRent,
-  NewHouseForSale,
-  NewProperty,
-  apartmentsForRent,
-  apartmentsForSale,
-  housesForRent,
-  housesForSale,
-  property,
-} from './db/schema.ts'
-import { parseDate } from './util/dates.ts'
+import { NewProperty, property } from './db/schema.ts'
 
 export const router = createCheerioRouter()
-
-// router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
-//   page.route('**/*', (route) => {
-//     if (route.request().resourceType() === 'image') {
-//       route.abort()
-//     }
-//   })
-//   log.info(`Fetching price ranges on HOMEPAGE...`, { url: request.loadedUrl })
-
-//   const priceFromSelector = '#slider-range-price-from'
-//   const priceToSelector = '#slider-range-price-to'
-//   const numSelector = '#search-count-number'
-//   const spinnerSelector = '#search-count-loader'
-//   const submitSelector = '#apply-filters-btn'
-
-//   let priceFrom = 0
-//   let priceTo = 80000
-
-//   // choose only apartments that are being sold
-//   const sellingHandle = await page.$('#filter-options > div:nth-child(4) > ul > li:nth-child(2) > a')
-//   await sellingHandle?.click()
-
-//   while (priceTo <= MAX_PRICE) {
-//     // clean price input fields
-//     await page.fill(priceFromSelector, '')
-//     await page.fill(priceToSelector, '')
-
-//     await page.fill(priceFromSelector, priceFrom.toString())
-
-//     // find the new priceTo
-//     while (true) {
-//       if (priceFrom >= 160_000) {
-//         priceTo = MAX_PRICE
-//         break
-//       }
-//       await page.type(priceToSelector, priceTo.toString(), { delay: 300 })
-//       await page.focus(priceFromSelector)
-//       await page.locator(spinnerSelector).waitFor({ state: 'visible' })
-//       await page.locator(numSelector).waitFor({ state: 'visible' })
-//       const numOfProperties = await page.$eval(numSelector, (el) =>
-//         parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
-//       )
-//       if (numOfProperties === -1 || isNaN(numOfProperties)) {
-//         log.error('Number of properties not found on the submit button!', {
-//           numOfProperties,
-//         })
-//         return
-//       }
-//       if (numOfProperties < 10000) {
-//         priceTo += STEP
-//         await page.fill(priceToSelector, '')
-//       } else {
-//         priceTo -= STEP
-//         break
-//       }
-//     }
-
-//     //get the link for that range and push it
-//     await page.fill(priceToSelector, '')
-//     await page.fill(priceToSelector, priceTo.toString())
-//     await page.focus(priceFromSelector)
-//     await page.waitForSelector(spinnerSelector, { state: 'visible' })
-//     await page.waitForSelector(numSelector, { state: 'visible' })
-//     await page.waitForSelector(submitSelector)
-//     await enqueueLinks({ selector: submitSelector, label: 'LIST' })
-
-//     log.info(`A new price range is established! The range is from ${priceFrom} to ${priceTo}.`, {
-//       numOfProperties: await page.$eval(numSelector, (el) =>
-//         parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
-//       ),
-//     })
-
-//     // priceFrom is now priceTo
-//     priceFrom = priceTo
-//     priceTo += STEP
-//   }
-// })
 
 router.addHandler('LIST', async ({ $, request, log, enqueueLinks }) => {
   if (request.url.includes('po-stranici/10/')) {
