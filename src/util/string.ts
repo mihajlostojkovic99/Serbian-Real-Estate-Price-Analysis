@@ -1,12 +1,12 @@
-export function parseNumber(input?: string | null): number | null {
+export function parseNumber(input?: string): number | undefined {
   if (!input) {
-    return null
+    return undefined
   }
 
-  const parsedNumber = Number(input)
+  const parsedNumber = Number(input.replace(/\s+/g, ''))
 
   if (isNaN(parsedNumber)) {
-    return null
+    return undefined
   }
 
   return parsedNumber

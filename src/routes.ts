@@ -1,4 +1,4 @@
-import { Dataset, createPlaywrightRouter } from 'crawlee'
+import { Dataset, createCheerioRouter } from 'crawlee'
 import { parse } from 'date-fns'
 import { getAttribute, parseNumber } from './util/string.ts'
 import { db } from './db/drizzle.ts'
@@ -7,109 +7,95 @@ import {
   NewApartmentForSale,
   NewHouseForRent,
   NewHouseForSale,
+  NewProperty,
   apartmentsForRent,
   apartmentsForSale,
   housesForRent,
   housesForSale,
+  property,
 } from './db/schema.ts'
 import { parseDate } from './util/dates.ts'
 
-export const router = createPlaywrightRouter()
+export const router = createCheerioRouter()
 
-const MAX_PRICE = 30_000_000
-const STEP = 20_000
+// router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
+//   page.route('**/*', (route) => {
+//     if (route.request().resourceType() === 'image') {
+//       route.abort()
+//     }
+//   })
+//   log.info(`Fetching price ranges on HOMEPAGE...`, { url: request.loadedUrl })
 
-router.use(async ({ blockRequests, request }) => {
-  if (request.label !== 'HOMEPAGE') {
-    await blockRequests({
-      extraUrlPatterns: [
-        'https://cms.nekretnine.rs/foto/**',
-        'https://img.nekretnine.rs/foto/**',
-        'https://www.nekretnine.rs/build/images/**',
-        'https://maps-api.planplus.rs/**',
-      ],
-    })
-  }
-})
+//   const priceFromSelector = '#slider-range-price-from'
+//   const priceToSelector = '#slider-range-price-to'
+//   const numSelector = '#search-count-number'
+//   const spinnerSelector = '#search-count-loader'
+//   const submitSelector = '#apply-filters-btn'
 
-router.addHandler('HOMEPAGE', async ({ request, log, enqueueLinks, page }) => {
-  page.route('**/*', (route) => {
-    if (route.request().resourceType() === 'image') {
-      route.abort()
-    }
-  })
-  log.info(`Fetching price ranges on HOMEPAGE...`, { url: request.loadedUrl })
+//   let priceFrom = 0
+//   let priceTo = 80000
 
-  const priceFromSelector = '#slider-range-price-from'
-  const priceToSelector = '#slider-range-price-to'
-  const numSelector = '#search-count-number'
-  const spinnerSelector = '#search-count-loader'
-  const submitSelector = '#apply-filters-btn'
+//   // choose only apartments that are being sold
+//   const sellingHandle = await page.$('#filter-options > div:nth-child(4) > ul > li:nth-child(2) > a')
+//   await sellingHandle?.click()
 
-  let priceFrom = 0
-  let priceTo = 80000
+//   while (priceTo <= MAX_PRICE) {
+//     // clean price input fields
+//     await page.fill(priceFromSelector, '')
+//     await page.fill(priceToSelector, '')
 
-  // choose only apartments that are being sold
-  const sellingHandle = await page.$('#filter-options > div:nth-child(4) > ul > li:nth-child(2) > a')
-  await sellingHandle?.click()
+//     await page.fill(priceFromSelector, priceFrom.toString())
 
-  while (priceTo <= MAX_PRICE) {
-    // clean price input fields
-    await page.fill(priceFromSelector, '')
-    await page.fill(priceToSelector, '')
+//     // find the new priceTo
+//     while (true) {
+//       if (priceFrom >= 160_000) {
+//         priceTo = MAX_PRICE
+//         break
+//       }
+//       await page.type(priceToSelector, priceTo.toString(), { delay: 300 })
+//       await page.focus(priceFromSelector)
+//       await page.locator(spinnerSelector).waitFor({ state: 'visible' })
+//       await page.locator(numSelector).waitFor({ state: 'visible' })
+//       const numOfProperties = await page.$eval(numSelector, (el) =>
+//         parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
+//       )
+//       if (numOfProperties === -1 || isNaN(numOfProperties)) {
+//         log.error('Number of properties not found on the submit button!', {
+//           numOfProperties,
+//         })
+//         return
+//       }
+//       if (numOfProperties < 10000) {
+//         priceTo += STEP
+//         await page.fill(priceToSelector, '')
+//       } else {
+//         priceTo -= STEP
+//         break
+//       }
+//     }
 
-    await page.fill(priceFromSelector, priceFrom.toString())
+//     //get the link for that range and push it
+//     await page.fill(priceToSelector, '')
+//     await page.fill(priceToSelector, priceTo.toString())
+//     await page.focus(priceFromSelector)
+//     await page.waitForSelector(spinnerSelector, { state: 'visible' })
+//     await page.waitForSelector(numSelector, { state: 'visible' })
+//     await page.waitForSelector(submitSelector)
+//     await enqueueLinks({ selector: submitSelector, label: 'LIST' })
 
-    // find the new priceTo
-    while (true) {
-      if (priceFrom >= 160_000) {
-        priceTo = MAX_PRICE
-        break
-      }
-      await page.type(priceToSelector, priceTo.toString(), { delay: 300 })
-      await page.focus(priceFromSelector)
-      await page.locator(spinnerSelector).waitFor({ state: 'visible' })
-      await page.locator(numSelector).waitFor({ state: 'visible' })
-      const numOfProperties = await page.$eval(numSelector, (el) =>
-        parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
-      )
-      if (numOfProperties === -1 || isNaN(numOfProperties)) {
-        log.error('Number of properties not found on the submit button!', {
-          numOfProperties,
-        })
-        return
-      }
-      if (numOfProperties < 10000) {
-        priceTo += STEP
-        await page.fill(priceToSelector, '')
-      } else {
-        priceTo -= STEP
-        break
-      }
-    }
+//     log.info(`A new price range is established! The range is from ${priceFrom} to ${priceTo}.`, {
+//       numOfProperties: await page.$eval(numSelector, (el) =>
+//         parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
+//       ),
+//     })
 
-    //get the link for that range and push it
-    await page.fill(priceToSelector, '')
-    await page.fill(priceToSelector, priceTo.toString())
-    await page.focus(priceFromSelector)
-    await page.waitForSelector(spinnerSelector, { state: 'visible' })
-    await page.waitForSelector(numSelector, { state: 'visible' })
-    await page.waitForSelector(submitSelector)
-    await enqueueLinks({ selector: submitSelector, label: 'LIST' })
+//     // priceFrom is now priceTo
+//     priceFrom = priceTo
+//     priceTo += STEP
+//   }
+// })
 
-    log.info(`A new price range is established! The range is from ${priceFrom} to ${priceTo}.`, {
-      numOfProperties: await page.$eval(numSelector, (el) =>
-        parseInt(el.textContent?.split(' ')[1].slice(1, -1) ?? '-1'),
-      ),
-    })
-
-    // priceFrom is now priceTo
-    priceFrom = priceTo
-    priceTo += STEP
-  }
-})
-
-router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
+router.addHandler('LIST', async ({ $, request, log, enqueueLinks }) => {
   if (request.url.includes('po-stranici/10/')) {
     await enqueueLinks({
       urls: [request.url.replace('po-stranici/10/', 'po-stranici/20/')],
@@ -120,241 +106,311 @@ router.addHandler('LIST', async ({ page, request, log, enqueueLinks }) => {
 
   const parsedUrl = request.url.split('/')
   const pageNumber = request.url.includes('po-stranici/20/stranica/') ? parsedUrl[parsedUrl.length - 2] : 1
-  await page.waitForLoadState('domcontentloaded')
 
-  const filtersChosen = await page.locator('#izabrali-ste').innerText()
-  log.info(`Fetching urls on "${filtersChosen}" page number ${pageNumber}...`, { url: request.loadedUrl })
+  let filters = ''
+  $('#izabrali-ste .remove-filter-link').each((_index, el) => {
+    const content = $(el).text().trim()
+    filters += content.substring(0, content.length - 2) + ' '
+  })
+  log.info(`Fetching urls on "${filters}" page number ${pageNumber}...`, { url: request.loadedUrl })
 
-  await page.waitForSelector('.offer-title > a')
   await enqueueLinks({
     selector: '.offer-title > a',
     label: 'PROPERTY',
   })
 
-  await page.waitForSelector('a.next-number')
-
-  await page.waitForSelector('a.pagination-arrow.arrow-right')
   await enqueueLinks({
-    selector: 'a.pagination-arrow.arrow-right',
-    // globs: [
-    //   'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
-    //   'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/**',
-    //   'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
-    //   'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/**',
-    // ],
+    selector: 'a.next-number',
+    globs: [
+      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/kuce/izdavanje-prodaja/prodaja/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/izdavanje/lista/po-stranici/20/stranica/**',
+      'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/cena/*/lista/po-stranici/20/stranica/**',
+    ],
     label: request.label,
   })
 
   const dataset = await Dataset.open('crawled_links')
   await dataset.pushData({
-    page: `PAGE "${filtersChosen}", page number ${pageNumber}, crawled`,
+    page: `PAGE "${filters}", page number ${pageNumber}, crawled`,
     url: request.loadedUrl,
   })
 })
 
-router.addHandler('PROPERTY', async ({ page, request, log }) => {
-  const [details, moreInfo, other, price, title, locationArr, datesOfPosting] = await Promise.all([
-    page
-      .$('#detalji > div:nth-child(2)')
-      .then((el) => el?.innerText())
-      .then((val) => val?.toLowerCase().split('\n')),
-    page
-      .$('#detalji > div:nth-child(3)')
-      .then((el) => el?.innerText())
-      .then((val) => val?.toLowerCase().split('\n'))
-      .then((val) => (val?.includes('dodatna opremljenost') ? val : undefined)),
-    page
-      .$('#detalji > div:last-child')
-      .then((el) => el?.innerText())
-      .then((val) => val?.toLowerCase().split('\n'))
-      .then((val) => (val?.includes('ostalo') ? val : undefined)),
-    page
-      .locator('.stickyBox__price')
-      .innerText()
-      .then((val) => {
-        return +val.split('\n')[0].replace(' EUR', '').replace(/\s+/g, '')
-      }),
-    page
-      .locator('.detail-title')
-      .innerText()
-      .then((val) => val.trim()),
-    page
-      .locator('.stickyBox__Location')
-      .innerText()
-      .then((val) => val.split(',').map((el) => el.toLowerCase().trim())),
-    page
-      .$('div.property__body > div.updated')
-      .then((el) => el?.innerText())
-      .then((val) => val?.toLowerCase()),
-  ])
-
-  const type = getAttribute('kategorija', details)
-
-  const forSale = getAttribute('transakcija', details) === 'prodaja' ? true : false
-  const houseOrApartment = type?.includes('kuća')
-    ? 'house'
-    : type?.includes('garsonjera') || type?.includes('stan')
-    ? 'apartment'
-    : null
-
-  const originalId = request.url.split('/').slice(-2, -1)[0]
+router.addHandler('PROPERTY', async ({ $, request, log }) => {
   const url = request.url
-  const numOfRooms = getAttribute<number>('broj soba', details, 'number')
-  const numOfBathrooms = getAttribute<number>('broj kupatila', details, 'number')
-  const sqMeters = parseNumber(
-    (getAttribute('kvadratura', details) || getAttribute('korisna površina do', details))?.split(' ')[0],
-  )
-  const landArea = getAttribute('površina zemljišta', details)?.split(' ')[0]
-  const yearBuilt = getAttribute<number>('godina izgradnje', details, 'number')
-  const balcony = moreInfo?.includes('terasa') || moreInfo?.includes('balkon') || moreInfo?.includes('lođa')
-  const basement = moreInfo?.includes('podrum')
-  const elevator = moreInfo?.includes('lift')
-  const parking =
-    moreInfo?.includes('spoljno parking mesto') || moreInfo?.includes('garaža') || moreInfo?.includes('garažno mesto')
-  const garage = moreInfo?.includes('garaža') || moreInfo?.includes('garažno mesto')
-  const pool = moreInfo?.includes('bazen')
-  const garden = moreInfo?.includes('vrt')
-  const reception = moreInfo?.includes('recepcija')
-  const registration = getAttribute('uknjiženo', details)?.includes('da') ?? false
+  const originalId = request.url.split('/').slice(-2, -1)[0]
+  const title = $('h1.detail-title').text().trim()
 
-  const totalFloors: number | null = getAttribute('ukupan brој spratova', details, 'number')
-  let floor: number | null = null
-  const floorString = getAttribute('spratnost', details)
-  switch (floorString) {
-    case 'suteren':
-      floor = -1
-      break
-    case 'prizemlje':
-    case 'visoko prizemlje':
-      floor = 0
-      break
-    case 'nije poslednji sprat':
-      floor = null
-      break
-    case '30+':
-      floor = 30
-      break
-    default:
-      floor = parseNumber(floorString)
-  }
+  const dates = $('.property__body .updated')
+    .text()
+    .match(/\b\d{2}\.\d{2}\.\d{4}\b/g)
 
-  const heatings = getAttribute('grejanje', other)
-    ?.split(',')
+  const dateUpdated = dates && dates[0] ? parse(dates?.[0], 'dd.MM.yyyy', new Date()).toISOString() : undefined
+  const datePosted = dates && dates[1] ? parse(dates?.[1], 'dd.MM.yyyy', new Date()).toISOString() : undefined
+
+  const hasMunicipality = $('.stickyBox__Location').text().split(',').length > 1
+  const preciseLocationRaw = $('.property__location')
+    .text()
+    .trim()
+    .split('\n')
     .map((el) => el.trim())
 
-  const centralHeating = heatings?.includes('centralno grejanje') ?? false
-  const thermalStorage = heatings?.includes('ta pec') ?? false
-  const airCon = heatings?.includes('klima uređaj') ?? false
-  const electricHeating = heatings?.includes('etažno grejanje na struju') ?? false
-  const gasHeating = heatings?.includes('etažno grejanje na gas') ?? false
-  const solidFuelHeating = heatings?.includes('etažno grejanje na čvrsto gorivo') ?? false
-  const floorHeating = heatings?.includes('podno grejanje') ?? false
+  const [country, region, city] = preciseLocationRaw
 
-  const dates = datesOfPosting?.match(/\b\d{2}\.\d{2}\.\d{4}\b/g)
+  const municipality = hasMunicipality && preciseLocationRaw.length > 3 ? preciseLocationRaw[3] : undefined
+  const street =
+    hasMunicipality && preciseLocationRaw.length > 4
+      ? preciseLocationRaw[4]
+      : preciseLocationRaw.length > 3
+      ? preciseLocationRaw[3]
+      : undefined
 
-  if (forSale === null || houseOrApartment === null || isNaN(price)) {
-    log.error('Insufficient data for db, will be stored in dataset!', {
+  const price = parseNumber($('.stickyBox__price').text().split(' EUR')[0])
+
+  let forSale: boolean | undefined
+  let houseOrApartment: 'apartment' | 'house' | undefined
+  let sqMeters: number | undefined
+  let registered: boolean | undefined
+  let landArea: number | undefined
+  let numOfRooms: number | undefined
+  let numOfBathrooms: number | undefined
+  let yearBuilt: number | undefined
+  let totalFloors: number | undefined
+  let floor: number | undefined
+
+  let balcony = false
+  let basement = false
+  let elevator = false
+  let parking = false
+  let garage = false
+  let pool = false
+  let garden = false
+  let reception = false
+
+  let centralHeating = false
+  let thermalStorage = false
+  let airCon = false
+  let electricHeating = false
+  let gasHeating = false
+  let solidFuelHeating = false
+  let floorHeating = false
+  let heatPumpHeating = false
+
+  $('.property__amenities').each((_index, element) => {
+    const $element = $(element)
+    const heading = $element.find('h3').text()
+
+    switch (heading) {
+      case 'Podaci o nekretnini':
+        const $list = $element.find('li')
+        $list.each((_index, element) => {
+          const item = $(element).text().trim()
+          const [category, value] = item.split(':').map((el) => el.trim())
+
+          switch (category) {
+            case 'Transakcija':
+              forSale = value === 'Izdavanje' ? false : true
+              break
+            case 'Kategorija':
+              const lowercase = value.toLowerCase()
+              houseOrApartment =
+                lowercase.includes('kuća') || lowercase.includes('kuće')
+                  ? 'house'
+                  : lowercase.includes('garsonjera') || lowercase.includes('stan')
+                  ? 'apartment'
+                  : undefined
+              break
+            case 'Kvadratura':
+              sqMeters = parseNumber(value.split(' ')[0])
+              break
+            case 'Uknjiženo':
+              registered = value === 'Da' ? true : false
+              break
+            case 'Površina zemljišta':
+              landArea = parseNumber(value.split(' ')[0])
+              break
+            case 'Ukupan broj soba':
+              numOfRooms = parseNumber(value)
+              break
+            case 'Broj kupatila':
+              numOfBathrooms = parseNumber(value)
+              break
+            case 'Spratnost':
+              switch (value) {
+                case 'suteren':
+                  floor = -1
+                  break
+                case 'prizemlje':
+                case 'visoko prizemlje':
+                  floor = 0
+                  break
+                case '30+':
+                  floor = 30
+                  break
+                default:
+                  floor = parseNumber(value)
+              }
+              break
+            case 'Ukupan brој spratova':
+            case 'Ukupan broj spratova':
+              totalFloors = parseNumber(value)
+              break
+            case 'Godina izgradnje':
+              yearBuilt = parseNumber(value)
+              break
+          }
+        })
+        break
+      case 'Dodatna opremljenost':
+        $element.find('li').each((_index, element) => {
+          const value = $(element).text().trim()
+          switch (value) {
+            case 'Terasa':
+            case 'Balkon':
+            case 'Lođa':
+              balcony = true
+              break
+            case 'Podrum':
+              basement = true
+              break
+            case 'Lift':
+              elevator = true
+              break
+            case 'Garaža':
+            case 'Garažno mesto':
+              garage = true
+              parking = true
+              break
+            case 'Spoljno parking mesto':
+              parking = true
+              break
+            case 'Bazen':
+              pool = true
+              break
+            case 'Vrt':
+              garden = true
+              break
+            case 'Recepcija':
+              reception = true
+              break
+          }
+        })
+        break
+      case 'Ostalo':
+        $element.find('li').each((_index, element) => {
+          const [category, commaList] = $(element)
+            .text()
+            .trim()
+            .split(':')
+            .map((el) => el.trim())
+
+          if (category === 'Grejanje') {
+            const list = commaList.split(',').map((el) => el.trim())
+            list.forEach((value) => {
+              switch (value) {
+                case 'TA peć':
+                  thermalStorage = true
+                  break
+                case 'Klima uređaj':
+                  airCon = true
+                  break
+                case 'Peć na drva/ugalj':
+                case 'Kamin':
+                case 'Etažno grejanje na čvrsto gorivo':
+                  solidFuelHeating = true
+                  break
+                case 'Etažno grejanje na struju':
+                  electricHeating = true
+                  break
+                case 'Etažno grejanje na gas':
+                case 'Plinska peć':
+                  gasHeating = true
+                  break
+                case 'Toplotna pumpa':
+                  heatPumpHeating = true
+                  break
+                case 'Centralno grejanje':
+                  centralHeating = true
+                  break
+                case 'Podno grejanje':
+                  floorHeating = true
+                  break
+              }
+            })
+          }
+        })
+        break
+    }
+  })
+
+  if (forSale === undefined || houseOrApartment === undefined || price === undefined) {
+    log.error('Insufficient data for db, will be stored in the insufficient_data dataset!', {
       url: request.url,
       forSale,
       houseOrApartment,
       price,
     })
-    Dataset.pushData({ url, originalId, title, forSale, type: houseOrApartment, error: true })
+    const dataset = await Dataset.open('insufficient_data')
+    await dataset.pushData({ url, originalId, title, forSale, type: houseOrApartment, error: true })
     return
+  }
+
+  const newProperty: NewProperty = {
+    url,
+    originalId,
+    title,
+    datePosted,
+    dateUpdated,
+    country,
+    region,
+    city,
+    municipality,
+    street,
+
+    forSale,
+    type: houseOrApartment,
+    sqMeters: sqMeters?.toString(),
+    registered,
+    landArea: landArea?.toString(),
+    numOfRooms: numOfRooms?.toString(),
+    numOfBathrooms,
+    yearBuilt,
+    totalFloors,
+    floor,
+
+    balcony,
+    basement,
+    elevator,
+    parking,
+    garage,
+    pool,
+    garden,
+    reception,
+
+    centralHeating,
+    thermalStorage,
+    airCon,
+    electricHeating,
+    gasHeating,
+    solidFuelHeating,
+    floorHeating,
+    heatPumpHeating,
+    price: price?.toString(),
   }
 
   log.info('Adding new property...', { url })
 
-  if (houseOrApartment === 'house') {
-    const newRow: NewHouseForRent | NewHouseForSale = {
-      originalId,
-      url,
-      dateUpdated: dates && dates[0] ? parse(dates[0], 'dd.MM.yyyy', new Date()).toISOString() : undefined,
-      dateCreated: dates && dates[1] ? parse(dates[1], 'dd.MM.yyyy', new Date()).toISOString() : undefined,
-      title,
-      city: locationArr[0],
-      location: locationArr.join(','),
-      numOfRooms: numOfRooms?.toString(),
-      numOfBathrooms,
-      sqMeters: sqMeters?.toString(),
-      landArea,
-      yearBuilt,
-      balcony,
-      basement,
-      elevator,
-      parking,
-      garage,
-      pool,
-      garden,
-      reception,
-      airCon,
-      centralHeating,
-      thermalStorage,
-      electricHeating,
-      gasHeating,
-      solidFuelHeating,
-      floorHeating,
-      totalFloors,
-      registration,
-      price: price.toString(),
-    }
+  const dataset = await Dataset.open('properties')
 
-    await Promise.all([
-      db
-        .insert(forSale ? housesForSale : housesForRent)
-        .values(newRow)
-        .onConflictDoUpdate({
-          target: [(forSale ? housesForSale : housesForRent).url, (forSale ? housesForSale : housesForRent).originalId],
-          set: { ...newRow },
-        }),
-      Dataset.pushData({ ...newRow, forSale, type: houseOrApartment }),
-    ])
-  } else if (houseOrApartment === 'apartment') {
-    const newRow: NewApartmentForRent | NewApartmentForSale = {
-      originalId,
-      url,
-      dateUpdated: parseDate(dates?.[0])?.toISOString(),
-      dateCreated: parseDate(dates?.[1])?.toISOString(),
-      title,
-      city: locationArr[0],
-      location: locationArr.join(','),
-      numOfRooms: numOfRooms?.toString(),
-      numOfBathrooms,
-      sqMeters: sqMeters?.toString(),
-      yearBuilt,
-      balcony,
-      basement,
-      elevator,
-      parking,
-      garage,
-      pool,
-      garden,
-      reception,
-      airCon,
-      centralHeating,
-      thermalStorage,
-      electricHeating,
-      gasHeating,
-      solidFuelHeating,
-      floorHeating,
-      totalFloors,
-      floor,
-      registration,
-      price: price.toString(),
-    }
-
-    await Promise.all([
-      db
-        .insert(forSale ? apartmentsForSale : apartmentsForRent)
-        .values(newRow)
-        .onConflictDoUpdate({
-          target: [
-            (forSale ? apartmentsForSale : apartmentsForRent).url,
-            (forSale ? apartmentsForSale : apartmentsForRent).originalId,
-          ],
-          set: { ...newRow },
-        }),
-      Dataset.pushData({ ...newRow, forSale, type: houseOrApartment }),
-    ])
-  }
+  await Promise.all([
+    db
+      .insert(property)
+      .values(newProperty)
+      .onConflictDoUpdate({
+        target: [property.url],
+        set: newProperty,
+      }),
+    dataset.pushData(newProperty),
+  ])
 })
