@@ -1,64 +1,56 @@
-import { and, eq, isNull, or } from 'drizzle-orm'
+import { and, eq, gte, inArray, isNull, lt, notInArray, or } from 'drizzle-orm'
 import { db } from './db/drizzle.ts'
-import { apartmentsForRent, apartmentsForSale, housesForRent, housesForSale } from './db/schema.ts'
-import { PgDialect } from 'drizzle-orm/pg-core'
+// import { PgDialect } from 'drizzle-orm/pg-core'
+import { property } from './db/schema.ts'
 
-const pgDialect = new PgDialect()
+// const pgDialect = new PgDialect()
 
 export async function cleanup() {
   console.log('Starting cleanup...')
-  const queryApartmentsForSale = db
-    .update(apartmentsForSale)
-    .set({ enabled: false })
+
+  // Removing undefined values
+  const rmNulls = db
+    .update(property)
+    .set({
+      enabled: false,
+    })
     .where(
       or(
-        isNull(apartmentsForSale.numOfRooms),
-        isNull(apartmentsForSale.city),
-        isNull(apartmentsForSale.sqMeters),
-        isNull(apartmentsForSale.floor),
+        isNull(property.city),
+        notInArray(property.country, ['Srbija']),
+        isNull(property.numOfRooms),
+        isNull(property.sqMeters),
+        and(eq(property.type, 'apartment'), isNull(property.floor)),
       ),
     )
+  const nullsRes = await rmNulls
+  console.log(`+ Removed ${nullsRes.count} undefined values, the generated query was: `, rmNulls.toSQL())
 
-  const queryApartmentsForRent = db
-    .update(apartmentsForRent)
-    .set({ enabled: false })
+  // Removing outliers
+  const rmOutliers = db
+    .update(property)
+    .set({
+      enabled: false,
+    })
     .where(
       or(
-        isNull(apartmentsForRent.numOfRooms),
-        isNull(apartmentsForRent.city),
-        isNull(apartmentsForRent.sqMeters),
-        isNull(apartmentsForRent.floor),
+        gte(property.numOfRooms, '20'),
+        lt(property.floor, -1),
+        lt(property.totalFloors, 0),
+        gte(property.totalFloors, 43),
+        gte(property.landArea, '220'),
+        and(
+          eq(property.type, 'apartment'),
+          or(
+            gte(property.sqMeters, '600'),
+            gte(property.numOfRooms, '10'),
+            gte(property.numOfBathrooms, 6),
+            isNull(property.municipality),
+          ),
+        ),
+        and(eq(property.type, 'house'), gte(property.sqMeters, '6500')),
       ),
     )
-
-  const queryHousesForRent = db
-    .update(housesForRent)
-    .set({ enabled: false })
-    .where(or(isNull(housesForRent.numOfRooms), isNull(housesForRent.city), isNull(housesForRent.sqMeters)))
-
-  const queryHousesForSale = db
-    .update(housesForSale)
-    .set({ enabled: false })
-    .where(or(isNull(housesForSale.numOfRooms), isNull(housesForSale.city), isNull(housesForSale.sqMeters)))
-
-  const sqlApartmentsForSale = pgDialect.sqlToQuery(queryApartmentsForSale.getSQL()).sql
-  const sqlApartmentsForRent = pgDialect.sqlToQuery(queryApartmentsForRent.getSQL()).sql
-  const sqlHousesForRent = pgDialect.sqlToQuery(queryHousesForRent.getSQL()).sql
-  const sqlHousesForSale = pgDialect.sqlToQuery(queryHousesForSale.getSQL()).sql
-
-  console.log('Generated SQLs for this cleanup are: ')
-  console.log(sqlApartmentsForSale)
-  console.log(sqlApartmentsForRent)
-  console.log(sqlHousesForRent)
-  console.log(sqlHousesForSale)
-  const [resApartmentsForSale, resApartmentsForRent, resHousesForRent, resHousesForSale] = await Promise.all([
-    queryApartmentsForSale,
-    queryApartmentsForRent,
-    queryHousesForRent,
-    queryHousesForSale,
-  ])
-  console.log(`Found ${resApartmentsForSale.count} dirty rows from ApartmentsForSale. Soft deletion performed on them.`)
-  console.log(`Found ${resApartmentsForRent.count} dirty rows from ApartmentsForRent. Soft deletion performed on them.`)
-  console.log(`Found ${resHousesForRent.count} dirty rows from HousesForRent. Soft deletion performed on them.`)
-  console.log(`Found ${resHousesForSale.count} dirty rows from HousesForSale. Soft deletion performed on them.`)
+  const outliersRes = await rmOutliers
+  console.log(`+ Removed ${outliersRes.count} outliers, the generated query was: `, rmOutliers.toSQL())
 }
