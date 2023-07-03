@@ -1,5 +1,5 @@
 import 'dotenv/config.js'
-import { PlaywrightCrawler, RequestOptions, Configuration, CheerioCrawler } from 'crawlee'
+import { RequestOptions, Configuration, CheerioCrawler } from 'crawlee'
 import { chromium } from 'playwright-extra'
 import stealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
@@ -8,6 +8,8 @@ import { migrationClient } from './db/drizzle.ts'
 import { router } from './routes.ts'
 import { cleanup } from './cleanup.ts'
 import { exit } from 'process'
+import { fetchFormattedData } from './data/prepare-data.ts'
+import { normalize } from './data/normalize.ts'
 
 const startUrls: RequestOptions[] = [
   {
@@ -49,7 +51,6 @@ const startUrls: RequestOptions[] = [
 
 const config = new Configuration({
   availableMemoryRatio: 0.7,
-  // maxUsedCpuRatio: 0.95,
   purgeOnStart: false,
   persistStorage: true,
 })
@@ -70,9 +71,19 @@ const crawler = new CheerioCrawler(
 await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
 
 // start crawling
-await crawler.run(startUrls)
+// await crawler.run(startUrls)
 
-// discard properties with not enough info
-await cleanup()
+// discard properties with not enough info and outliers
+// await cleanup()
+
+const data = await fetchFormattedData()
+
+await normalize(data)
+
+console.log('********* DATA AFTER NORMALIZATION ->', data)
+
+// train-test split
+// shuffle
+// algo
 
 exit()

@@ -85,6 +85,13 @@
       "when": 1687697478650,
       "tag": "0011_white_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1688337925398,
+      "tag": "0012_pink_white_tiger",
+      "breakpoints": true
     }
   ]
 }

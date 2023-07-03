@@ -31,6 +31,8 @@ export const property = pgTable(
     region: varchar('region', { length: 255 }),
     city: varchar('city', { length: 255 }),
     municipality: varchar('municipality', { length: 255 }),
+    mlMunicipality: varchar('ml_municipality', { length: 255 }),
+    mlBelgradeDistance: decimal('ml_belgrade_distance'),
     street: varchar('street', { length: 255 }),
     numOfRooms: decimal('num_of_rooms'),
     numOfBathrooms: integer('num_of_bathrooms'),
