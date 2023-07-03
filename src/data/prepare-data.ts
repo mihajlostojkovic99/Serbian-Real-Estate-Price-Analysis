@@ -113,3 +113,5 @@ export async function fetchFormattedData() {
     }
   })
 }
+
+export type FormattedData = Awaited<ReturnType<typeof fetchFormattedData>>[number]

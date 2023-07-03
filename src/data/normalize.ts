@@ -20,8 +20,8 @@ type NumberValues = {
 export async function normalize<T extends NumberValues>(data: T[]) {
   const factors = await Promise.all(
     seriesNames.map(async (name) => {
-      const minQuery = db
-        .select({ min: sql<number>`MIN(${property[name]})` })
+      const meanQuery = db
+        .select({ mean: sql<number>`AVG(${property[name]})` })
         .from(property)
         .where(
           and(
@@ -31,8 +31,8 @@ export async function normalize<T extends NumberValues>(data: T[]) {
             isNotNull(property.mlMunicipality),
           ),
         )
-      const maxQuery = db
-        .select({ max: sql<number>`MAX(${property[name]})` })
+      const stdQuery = db
+        .select({ std: sql<number>`STDDEV(${property[name]})` })
         .from(property)
         .where(
           and(
@@ -43,15 +43,19 @@ export async function normalize<T extends NumberValues>(data: T[]) {
           ),
         )
 
-      const [min, max] = await Promise.all([minQuery, maxQuery])
+      const [mean, std] = await Promise.all([meanQuery, stdQuery])
 
-      return { name, min: min[0].min, max: max[0].max }
+      return { name, mean: mean[0].mean, std: std[0].std }
     }),
   )
 
   data.forEach((row) => {
-    factors.forEach(({ name, min, max }) => {
-      row[name] = (row[name] - min) / (max - min)
+    factors.forEach(({ name, mean, std }) => {
+      row[name] = (row[name] - mean) / std
     })
   })
+
+  const { mean, std } = factors.find(({ name }) => name === 'price') || { mean: 0, std: 0 }
+
+  return { meanPrice: +mean, stdPrice: +std }
 }

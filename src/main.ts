@@ -10,6 +10,8 @@ import { cleanup } from './cleanup.ts'
 import { exit } from 'process'
 import { fetchFormattedData } from './data/prepare-data.ts'
 import { normalize } from './data/normalize.ts'
+import { trainTestSplit } from './data/train-test-split.ts'
+import { LinearRegressionGradientDescent } from './models/linear-regression.ts'
 
 const startUrls: RequestOptions[] = [
   {
@@ -68,7 +70,7 @@ const crawler = new CheerioCrawler(
 )
 
 // run db migrations
-await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
+// await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
 
 // start crawling
 // await crawler.run(startUrls)
@@ -78,12 +80,32 @@ await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
 
 const data = await fetchFormattedData()
 
-await normalize(data)
+const { meanPrice, stdPrice } = await normalize(data)
 
-console.log('********* DATA AFTER NORMALIZATION ->', data)
+const { train, test } = trainTestSplit(data, 5)
 
-// train-test split
-// shuffle
-// algo
+const lrgd = new LinearRegressionGradientDescent(train)
+
+const { coefficients, mseHistory } = lrgd.performGradientDescent(1000)
+
+console.log('********* COEFFICIENTS ->', coefficients)
+
+const result = lrgd.predict(test)
+
+const denormalizedResult = result.map((item) => {
+  const prediction = item.prediction * stdPrice + meanPrice
+  const actual = item.actual * stdPrice + meanPrice
+  return {
+    prediction,
+    actual,
+    diff: Math.abs(prediction - actual),
+  }
+})
+
+console.log('MSE minimum: ', Math.min(...mseHistory))
+console.log('MSE actual: ', mseHistory[mseHistory.length - 1])
+
+// console.log('********* RESULT ->', denormalizedResult)
+// console.log('tmp: ', meanPrice, stdPrice)
 
 exit()
