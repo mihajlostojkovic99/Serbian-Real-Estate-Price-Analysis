@@ -29,26 +29,28 @@ export class LinearRegressionGradientDescent {
     garden: 0,
     reception: 0,
   }
-  private mseHistory: number[] = []
+  private maeHistory: number[] = []
   constructor(private readonly data: FormattedData[]) {}
 
-  private updateMseHistory() {
+  private updateMaeHistory({ meanPrice, stdPrice }: { meanPrice: number; stdPrice: number }) {
     let errors = []
     for (const row of this.data) {
-      let predicted = 0
+      let prediction = 0
       for (const coeff in this.coefficients) {
         if (coeff === 'intercept') {
-          predicted += this.coefficients[coeff]
+          prediction += this.coefficients[coeff]
         } else {
-          predicted +=
+          prediction +=
             this.coefficients[coeff as keyof Omit<FormattedData, 'price' | 'id'>] *
             row[coeff as keyof Omit<FormattedData, 'price' | 'id'>]
         }
       }
-      const error = Math.pow(row.price - predicted, 2)
+      // const error = Math.pow(Math.abs(row.price - prediction) * stdPrice + meanPrice, 2)
+      const error = Math.abs(row.price * stdPrice + meanPrice - (prediction * stdPrice + meanPrice))
       errors.push(error)
     }
-    this.mseHistory.push((errors.reduce((prev, curr) => prev + curr) / errors.length) * 0.5)
+    // this.mseHistory.push(Math.pow(errors.reduce((prev, curr) => prev + curr) / errors.length, 1 / 2))
+    this.maeHistory.push(errors.reduce((prev, curr) => prev + curr) / errors.length)
   }
 
   private gradientDescentStep(learningRate: number) {
@@ -67,45 +69,60 @@ export class LinearRegressionGradientDescent {
         }
       }
 
-      const error = y - prediction
+      const error = prediction - y
       for (const coeff in this.coefficients) {
         if (coeff === 'intercept') {
-          this.coefficients[coeff] += error * learningRate
+          this.coefficients[coeff] -= error * learningRate
         } else {
-          this.coefficients[coeff as keyof Omit<FormattedData, 'price' | 'id'>] +=
+          this.coefficients[coeff as keyof Omit<FormattedData, 'price' | 'id'>] -=
             error * features[coeff as keyof Omit<FormattedData, 'price' | 'id'>] * learningRate
         }
       }
     }
   }
 
-  performGradientDescent(iterations: number, learningRate = 0.005) {
-    console.log('STARTING GRADIENT DESCENT...')
-    for (let i = 0; i < iterations; i++) {
-      this.gradientDescentStep(learningRate)
-      this.updateMseHistory()
+  shuffleData() {
+    for (let i = this.data.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[this.data[i], this.data[j]] = [this.data[j], this.data[i]]
     }
-
-    return { coefficients: this.coefficients, mseHistory: this.mseHistory }
   }
 
-  predict(testData: FormattedData[]) {
-    return testData.map((row) => {
+  performGradientDescent(iterations: number, priceInfo: { meanPrice: number; stdPrice: number }, learningRate = 0.001) {
+    console.log('STARTING GRADIENT DESCENT...')
+    for (let i = 0; i < iterations; i++) {
+      this.shuffleData()
+      this.gradientDescentStep(learningRate)
+      this.updateMaeHistory(priceInfo)
+    }
+
+    return { coefficients: this.coefficients, maeHistory: this.maeHistory }
+  }
+
+  predict(testData: FormattedData[], { meanPrice, stdPrice }: { meanPrice: number; stdPrice: number }) {
+    let mae = 0
+    for (const row of testData) {
       const y = row.price
       const features = _.omit(row, 'price')
 
-      let price = 0
+      let prediction = 0
       for (const coeff in this.coefficients) {
         if (coeff === 'intercept') {
-          price += this.coefficients[coeff]
+          prediction += this.coefficients[coeff]
         } else {
-          price +=
+          prediction +=
             this.coefficients[coeff as keyof Omit<FormattedData, 'price' | 'id'>] *
             features[coeff as keyof Omit<FormattedData, 'price' | 'id'>]
         }
       }
+      mae += Math.abs(prediction * stdPrice + meanPrice - (y * stdPrice + meanPrice))
 
-      return { prediction: price, actual: y }
-    })
+      return { prediction: prediction, actual: y }
+    }
+    mae /= testData.length
+
+    console.log('****** MAE:', mae)
+
+    return mae
   }
 }

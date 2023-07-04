@@ -1,0 +1,1 @@
+ALTER TABLE "linear_regression" ADD COLUMN "intercept" numeric;

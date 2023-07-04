@@ -83,9 +83,9 @@ export async function fetchFormattedData() {
 
   const [bathroomsRes, floorsRes, yearsRes] = await Promise.all([bathroomsQuery, floorsQuery, yearsQuery])
 
-  const numOfBathroomsMean = Math.round(bathroomsRes[0].mean)
-  const totalFloorsMean = Math.round(floorsRes[0].mean)
-  const yearBuiltMean = Math.round(yearsRes[0].mean)
+  const numOfBathroomsMean = Math.round(+bathroomsRes[0].mean)
+  const totalFloorsMean = Math.round(+floorsRes[0].mean)
+  const yearBuiltMean = Math.round(+yearsRes[0].mean)
 
   apartments.forEach((apartment) => {
     if (apartment.numOfBathrooms === null) {

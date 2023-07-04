@@ -69,3 +69,35 @@ export const property = pgTable(
 )
 export type Property = InferModel<typeof property>
 export type NewProperty = InferModel<typeof property, 'insert'>
+
+export const linearRegression = pgTable('linear_regression', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  dateCalculated: date('date_scraped').notNull().defaultNow(),
+  intercept: decimal('intercept').notNull(),
+  mlBelgradeDistance: decimal('ml_belgrade_distance').notNull(),
+  numOfRooms: decimal('num_of_rooms').notNull(),
+  numOfBathrooms: decimal('num_of_bathrooms').notNull(),
+  sqMeters: decimal('sq_meters').notNull(),
+  yearBuilt: decimal('year_built').notNull(),
+  floor: decimal('floor').notNull(),
+  totalFloors: decimal('total_floors').notNull(),
+  registered: decimal('registration').notNull(),
+  floorHeating: decimal('floor_heating').notNull(),
+  heatPumpHeating: decimal('heat_pump_heating').notNull(),
+  centralHeating: decimal('central_heating').notNull(),
+  electricHeating: decimal('electric_heating').notNull(),
+  solidFuelHeating: decimal('solid_fuel_heating').notNull(),
+  gasHeating: decimal('gas_heating').notNull(),
+  thermalStorage: decimal('thermal_storage').notNull(),
+  airCon: decimal('air_con').notNull(),
+  parking: decimal('parking').notNull(),
+  garage: decimal('garage').notNull(),
+  elevator: decimal('elevator').notNull(),
+  balcony: decimal('balcony').notNull(),
+  basement: decimal('basement').notNull(),
+  pool: decimal('pool').notNull(),
+  garden: decimal('garden').notNull(),
+  reception: decimal('reception').notNull(),
+})
+export type LinearRegression = InferModel<typeof linearRegression>
+export type LinearRegressionInsert = InferModel<typeof linearRegression, 'insert'>

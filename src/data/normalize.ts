@@ -45,7 +45,7 @@ export async function normalize<T extends NumberValues>(data: T[]) {
 
       const [mean, std] = await Promise.all([meanQuery, stdQuery])
 
-      return { name, mean: mean[0].mean, std: std[0].std }
+      return { name, mean: +mean[0].mean, std: +std[0].std }
     }),
   )
 
