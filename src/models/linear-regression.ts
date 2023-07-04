@@ -45,11 +45,9 @@ export class LinearRegressionGradientDescent {
             row[coeff as keyof Omit<FormattedData, 'price' | 'id'>]
         }
       }
-      // const error = Math.pow(Math.abs(row.price - prediction) * stdPrice + meanPrice, 2)
       const error = Math.abs(row.price * stdPrice + meanPrice - (prediction * stdPrice + meanPrice))
       errors.push(error)
     }
-    // this.mseHistory.push(Math.pow(errors.reduce((prev, curr) => prev + curr) / errors.length, 1 / 2))
     this.maeHistory.push(errors.reduce((prev, curr) => prev + curr) / errors.length)
   }
 
@@ -72,10 +70,10 @@ export class LinearRegressionGradientDescent {
       const error = prediction - y
       for (const coeff in this.coefficients) {
         if (coeff === 'intercept') {
-          this.coefficients[coeff] -= error * learningRate
+          this.coefficients[coeff] -= (error * learningRate) / this.data.length
         } else {
           this.coefficients[coeff as keyof Omit<FormattedData, 'price' | 'id'>] -=
-            error * features[coeff as keyof Omit<FormattedData, 'price' | 'id'>] * learningRate
+            (error * features[coeff as keyof Omit<FormattedData, 'price' | 'id'>] * learningRate) / this.data.length
         }
       }
     }
@@ -88,7 +86,7 @@ export class LinearRegressionGradientDescent {
     }
   }
 
-  performGradientDescent(iterations: number, priceInfo: { meanPrice: number; stdPrice: number }, learningRate = 0.001) {
+  performGradientDescent(iterations: number, priceInfo: { meanPrice: number; stdPrice: number }, learningRate = 0.01) {
     console.log('STARTING GRADIENT DESCENT...')
     for (let i = 0; i < iterations; i++) {
       this.shuffleData()
@@ -101,6 +99,9 @@ export class LinearRegressionGradientDescent {
 
   predict(testData: FormattedData[], { meanPrice, stdPrice }: { meanPrice: number; stdPrice: number }) {
     let mae = 0
+    let rmse = 0
+    let sumOfSquaredResiduals = 0
+    let sumOfSquaredTotal = 0
     for (const row of testData) {
       const y = row.price
       const features = _.omit(row, 'price')
@@ -116,13 +117,14 @@ export class LinearRegressionGradientDescent {
         }
       }
       mae += Math.abs(prediction * stdPrice + meanPrice - (y * stdPrice + meanPrice))
-
-      return { prediction: prediction, actual: y }
+      rmse += Math.pow(prediction * stdPrice + meanPrice - (y * stdPrice + meanPrice), 2)
+      sumOfSquaredResiduals += Math.pow(prediction * stdPrice + meanPrice - (y * stdPrice + meanPrice), 2)
+      sumOfSquaredTotal += Math.pow(y * stdPrice + meanPrice - meanPrice, 2)
     }
     mae /= testData.length
+    rmse = Math.sqrt(rmse / testData.length)
+    const r2 = 1 - sumOfSquaredResiduals / sumOfSquaredTotal
 
-    console.log('****** MAE:', mae)
-
-    return mae
+    return { mae, rmse, r2 }
   }
 }

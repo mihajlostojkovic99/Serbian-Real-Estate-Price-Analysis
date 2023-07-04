@@ -71,10 +71,10 @@ const crawler = new CheerioCrawler(
 await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' })
 
 // start crawling
-// await crawler.run(startUrls)
+await crawler.run(startUrls)
 
 // discard properties with not enough info and outliers
-// await cleanup()
+await cleanup()
 
 const coefficients = await ml()
 

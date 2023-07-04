@@ -16,11 +16,14 @@ export async function ml() {
 
   console.log('********* COEFFICIENTS ->', coefficients)
 
-  const result = lrgd.predict(test, { meanPrice, stdPrice })
+  const { mae, rmse, r2 } = lrgd.predict(test, { meanPrice, stdPrice })
 
-  console.log('***** MAE last 100', maeHistory.slice(-100))
-  console.log('MAE minimum: ', Math.min(...maeHistory))
-  console.log('MAE actual: ', maeHistory[maeHistory.length - 1])
+  // console.log('***** MAE last 100', maeHistory.slice(-100))
+
+  console.log('\nModel performance:')
+  console.log('MAE: ', mae)
+  console.log('RMSE: ', rmse)
+  console.log('R2: ', r2)
 
   return coefficients
 }
